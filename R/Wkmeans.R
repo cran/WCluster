@@ -168,23 +168,50 @@ Wkmeans_single = function(x,y,u = NULL, w = rep(1, length(y)),k=3,K=30) {
   #if(missing(K)) K=2^(40/log10(n))
   k = max(y)
   tb= table(y)
-  yy=y
+  yy=y2=y
+
   for(l in 1:K) {
     message(paste("Iteration ",
                   l, sep = ""))
     uu0 = uu00 = wwcss(x,yy,w)
-    #C code for this part!!!
+    for(ll in 1:20) {
+      #message(paste("iteration ", ll, sep = ""))
+      yy0=yy
+      mm=wcmat(t(x),yy,w)
+      m12=array(x^2 %*% rep(1,ncol(x)),dim=c(nrow(x),k))
+      m21=matrix(rep(1,nrow(mm))%*% mm^2,nrow=nrow(x),k,byrow=T)
+      m22=x%*%mm
+      yy=apply(m12+m21-m22*2,1,which.min)
+      uu0 = wwcss(x,yy,w)
+      #      if( all(yy==yy0)) break
+      if(uu0>uu00) yy=yy0 else if(uu0<=uu00) uu0=uu00
+    }
+
+    uu0 = uu00 = wwcss(x,yy,w)
+    # message(paste( uu0, sep=" "))
     for(i in 1:n) { for (j in 1:k){
       y2 = yy;
       if(y2[i]!=j & tb[y2[i]]>1) {
         y2[i]=j
         uu1= wwcss(x, y2,w)
-        if(uu1< uu0) {uu0= uu1; yy = y2; tb= table(yy)  }
+        if(uu1<= uu0) {uu0= uu1; yy = y2; tb= table(yy)  }
       }
     }
-   ##
     }
-    if(uu0>=uu00) break;
+    if(all(yy0==yy)) break;
   }
   list(uu0,yy)
+}
+
+
+wcmat = function (x, gr,w=rep(1,nrow(x)))
+{
+  x <- x[, sort.list(gr)]
+  w = w[sort.list(gr)]
+  tk <- c(table(gr))
+  p <- length(tk)
+  ttk <- cbind(rep(tk, p), 0)
+  ttk[1 + (p + 1) * (0:(p - 1)), 2] <- 1
+  z <- array(rep(ttk[, 2], ttk[, 1]), c(length(gr), p))
+  t(t(x %*% z)/tk)
 }
