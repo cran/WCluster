@@ -27,7 +27,7 @@ Number of desired clusters. Must be of class numeric or integer.
 }
 
   \item{cl.centers}{
-Chosen cluster centers. If NULL (default), random partition initialization would be used. If not NULL, must be a matrix containing only entries of class numeric with dimensions k by the dimension of data nugget centers.
+Chosen cluster centers. If NULL (default), random partition initialization would be used. If not NULL, must be a matrix containing only entries of class numeric with dimensions the dimension of data nugget centers by k.
 }
 
   \item{num.init}{
@@ -46,7 +46,7 @@ Random seed for replication. Must be of class numeric or integer.
 \details{
 Data nuggets are a representative sample meant to summarize Big Data by reducing a large dataset to a much smaller dataset by eliminating redundant points while also preserving the peripheries of the dataset. Each data nugget is defined by a center (location), weight (importance), and scale (internal variability). Data nuggets for a large dataset could be created and refined by functions \code{create.DN} or \code{refine.DN} in the package \code{datanugget}.
 
-K-means clustering with observation weigths can be used as an unsupervised learning technique to cluster observations contained in datasets that also have a measure of importance (e.g. weight) associated with them. In the case of data nuggets, this is the weight parameter associated with the data nuggets, so the centers of data nuggets are clustered using their weight parameters. The objective of the algorithm which performs this method of clustering is to minimize the weighted within cluster sum of squares (WWCSS) considering data nugget weights.
+K-means clustering with observation weights can be used as an unsupervised learning technique to cluster observations contained in datasets that also have a measure of importance (e.g. weight) associated with them. In the case of data nuggets, this is the weight parameter associated with the data nuggets, so the centers of data nuggets are clustered using their weight parameters. The objective of the algorithm which performs this method of clustering is to minimize the weighted within cluster sum of squares (WWCSS) considering data nugget weights.
 
 In this function, if no chosen initial cluster centers for data nuggets, random partition initialization with nugget weights is used. Each data nugget is first randomly assigned to a random cluster ID, and then the weighted cluster centers are calculated considering nugget weights. The initial cluster assignments are obtained by choosing the clusters with minimal weighted sum of squares of residuals with respect to the weighted centers.
 }
@@ -57,7 +57,7 @@ A list containing the following components:
 
 \item{Cluster Centers}{k by dimension of data nuggets matrix containing the weighted cluster centers for each cluster.}
 
-\item{Weighted WCSS}{List containing the individual WWCSS for each cluster and the combined sum of all individual WWCSS's.}
+\item{WWCSS}{List containing the individual WWCSS for each cluster and the combined sum of all individual WWCSS's.}
 
 \item{Cluster Assignments for original dataset}{Vector of length(datanugget$`Data Nugget Assignments`), i.e., number of observations in the original large dataset. It contains the cluster assignments for each observation in the original large dataset.}
 
@@ -125,7 +125,7 @@ Yajie Duan, Javier Cabrera, Ge Cheng
 
 
       DN.clus$`Cluster Centers`
-      DN.clus$`Weighted WCSS`
+      DN.clus$`WWCSS`
 
 
       #plot the clustering result for data nuggets

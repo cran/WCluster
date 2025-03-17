@@ -1,8 +1,9 @@
 
 
-#predict clusters for new data points or new data nuggets given cluster assignments for data nuggets
-#datanugget is a "datanugget" object, cl is the cluster assignment vector for the nuggets
-#newx is either a data frame of new data points or a new datanugget object
+# Predict clusters for new data points or new data nuggets given cluster assignments for data nuggets
+# datanugget is a "datanugget" object, cl is the cluster assignment vector for the nuggets
+# newx is either a data frame of new data points or a new datanugget object
+
 DNcluster.predict <- function(datanugget, cl, newx){
 
   # Argument checking/fixing ####

@@ -2,7 +2,7 @@
 # K-means with observation weights for Data Nugget object
 # datanugget is a "datanugget" object
 # k is the number of desired clusters,
-# cl.centers is chosen initial cluster centers by users. If not NULL, must be a k by dimension of datanugget centers matrix
+# cl.centers is chosen initial cluster centers by users. If not NULL, must be a dimension of datanugget centers matrix by k
 # containing only entries of class numeric.
 # max.iterations is the maximum number of iterations attempted for convergence before quitting.
 # num.init is the number of initial clusters to attempt.
@@ -11,7 +11,7 @@
 DN.Wkmeans <- function(datanugget, k, cl.centers = NULL, num.init = 1,
                        max.iterations = 10, seed = 291102){
 
-  # Argument checking/fixing ####
+  # Argument checking/fixing ##
 
   # make sure datanugget is of class "datanugget"
   if (!inherits(datanugget,"datanugget")){

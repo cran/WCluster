@@ -52,7 +52,7 @@ Yajie Duan, Javier Cabrera, Ge Cheng
                         R = 100,
                         delete.percent = .1,
                         DN.num1 = 100,
-                        DN.num2 = 50,
+                        DN.num2 = 30,
                         no.cores = 0,
                         make.pbs = FALSE)
 

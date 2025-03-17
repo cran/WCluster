@@ -1,7 +1,7 @@
-# Weighted Within-cluster sum of squares
-#x is the data matrix, cl is the cluster assignment vector,  w is the weight vector
-#groupSum is to indicate whether the output includes the weighted within-cluster
-#sum of squares for each cluster
+# Function to calculate the Weighted Within-cluster Sum of Squares(WWCSS)
+# x is the data matrix, cl is the cluster assignment vector,  w is the weight vector
+# groupSum is to indicate whether the output includes the WWCSS for each cluster
+
 wwcss = function (x, cl, w = rep(1,length(x)), groupSum = FALSE) {
 
   x = as.data.frame(x)
@@ -28,4 +28,4 @@ wwcss = function (x, cl, w = rep(1,length(x)), groupSum = FALSE) {
 
   if(groupSum)list(WWCSS = output,TotalWWCSS = sum(output)) else sum(output)
 
-  }
+}

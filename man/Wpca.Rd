@@ -30,7 +30,7 @@ A list containing the following components:
 
 \item{rotation}{The matrix of the loading vectors for each of the weighted prinicipal components.}
 
-\item{x}{The weighted prinicipal components.}
+\item{x}{The weighted principal components.}
 
 \item{center, scale}{the weighted centering and scaling used.}
 
@@ -60,7 +60,7 @@ Javier Cabrera, Yajie Duan, Ge Cheng
     #PCA with observational weights
     res = Wpca(x, wrow = w)
 
-    #weighted prinicipal components
+    #weighted principal components
     pc = res$x
     pc
 

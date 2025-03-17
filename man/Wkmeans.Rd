@@ -28,7 +28,7 @@ Number of desired clusters. Must be of class numeric or integer.
 }
 
   \item{cl.centers}{
-Chosen cluster centers. If NULL (default), random partition initialization with observational weights would be used. If not NULL, must be a k by ncol(dataset) matrix containing only entries of class numeric.
+Chosen cluster centers. If NULL (default), random partition initialization with observational weights would be used. If not NULL, must be a ncol(dataset) by k matrix containing only entries of class numeric.
 }
 
   \item{obs.weights}{
@@ -61,7 +61,7 @@ A list containing the following components:
 
 \item{Cluster Centers}{k by ncol(dataset) matrix containing the weighted cluster centers for each cluster.}
 
-\item{Weighted WCSS}{List containing the individual WWCSS for each cluster and the combined sum of all individual WWCSS's.}
+\item{WWCSS}{List containing the individual WWCSS for each cluster and the combined sum of all individual WWCSS's.}
 
 }
 \references{
@@ -89,11 +89,11 @@ Javier Cabrera, Yajie Duan, Ge Cheng
     #k-means with observational weights
     cl = Wkmeans(dataset = x, k = 2, obs.weights = w, num.init = 2)
 
-    plot(x,cex = log(w),pch = 16,col = cl$`Cluster Assignments`)
-    points(cl$`Cluster Centers`, col = 1:2, pch = 8, cex = 5)
+    plot(x,cex = log(w),pch = 12,col = cl$`Cluster Assignments`)
+    points(cl$`Cluster Centers`, col = 1:2, pch = 16, cex = 5)
 
     #individual WWCSS for each cluster and the combined sum of all individual WWCSS's
-    cl$`Weighted WCSS`
+    cl$`WWCSS`
 
 
     require(cluster)
@@ -107,10 +107,10 @@ Javier Cabrera, Yajie Duan, Ge Cheng
     #k-means with observational weights
     cl = Wkmeans(dataset = x, k = 4, obs.weights = w, num.init = 3)
 
-    plot(x,cex = log(w),pch = 16,col = cl$`Cluster Assignments`)
-    points(cl$`Cluster Centers`, col = 1:4, pch = 8, cex = 5)
+    plot(x,cex = log(w),pch = 12,col = cl$`Cluster Assignments`)
+    points(cl$`Cluster Centers`, col = 1:4, pch = 16, cex = 5)
 
     #individual WWCSS for each cluster and the combined sum of all individual WWCSS's
-    cl$`Weighted WCSS`
+    cl$`WWCSS`
 
 }

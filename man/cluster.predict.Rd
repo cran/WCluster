@@ -2,7 +2,7 @@
 \alias{cluster.predict}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Predict the closest clusters for a new dataset.
+Predict the clusters for a new dataset.
 }
 \description{
 Given observations with weights and cluster assignments, this function returns the cluster assignments for a new dataset by choosing the closest clusters.

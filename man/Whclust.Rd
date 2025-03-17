@@ -44,8 +44,8 @@ Javier Cabrera, Yajie Duan, Ge Cheng
     require(cluster)
       t1 = Sys.time()
 
-    # The Ruspini data set from the package "cluster""
-    x = as.matrix(ruspini)
+    # A subset of the Ruspini data set from the package "cluster""
+    x = as.matrix(ruspini)[51:75,]
 
     # assign random weights to observations
     w = sample(1:20,nrow(x),replace = TRUE)
@@ -59,12 +59,12 @@ Javier Cabrera, Yajie Duan, Ge Cheng
     #plot the hierarchical tree
     plot(h)
 
-    #cut the hierarchical tree to get 4 clusters
-    k4 = cutree(h,4)
-    table(k4)
+    #cut the hierarchical tree to get 2 clusters
+    k2 = cutree(h,2)
+    table(k2)
 
     #plot the clustering result
-    plot(x,cex = log(w),pch = 16,col = k4)
+    plot(x,cex = log(w),pch = 16,col = k2)
       t2 = Sys.time()
 
 }

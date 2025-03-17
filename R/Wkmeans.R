@@ -1,17 +1,14 @@
 
-#Function of k-means for obervations with weight, considering multiple initializations
-# dataset is the data matrix,  obs.weights is the weight vector, k is the number of desired clusters,
+# Function of k-means clustering for observations with weight, considering multiple initialisations
+# dataset is the data matrix, obs.weights is the weight vector, k is the number of desired clusters,
 # cl.centers is chosen initial cluster centers by users. If not NULL, must be a k by ncol(dataset) matrix
 # containing only entries of class numeric.
 # max.iterations is the maximum number of iterations attempted for convergence before quitting.
 # num.init is the number of initial clusters to attempt.
-Wkmeans <- function (dataset, k, cl.centers = NULL, obs.weights = rep(1, nrow(dataset)), num.init = 1,
+
+Wkmeans <- function (dataset, k, cl.centers = NULL, 
+                     obs.weights = rep(1, nrow(dataset)), num.init = 1,
                      max.iterations = 10, seed = 291102) {
-
-  # convert the data set to a data matrix
-  dataset = as.matrix(dataset)
-
-  # Argument checking/fixing ####
 
   # make sure k is of class numeric
   if (!is.numeric(k)){
@@ -23,10 +20,10 @@ Wkmeans <- function (dataset, k, cl.centers = NULL, obs.weights = rep(1, nrow(da
   # make sure cl.centers is of proper dimension if it is not NULL
   if (!is.null(cl.centers)){
 
-    if (nrow(cl.centers) != k |
-        ncol(cl.centers) != ncol(dataset)){
+    if (nrow(cl.centers) != ncol(dataset) |
+        ncol(cl.centers) != k){
 
-      stop('cl.centers must be a k by ncol(dataset) numeric matrix')
+      stop('cl.centers must be a ncol(dataset) by k numeric matrix')
 
     }
 
@@ -69,13 +66,14 @@ Wkmeans <- function (dataset, k, cl.centers = NULL, obs.weights = rep(1, nrow(da
     stop('seed must be of class "numeric"')
 
   }
-
-  # Function ####
+  
+  dataset <- as.matrix(dataset)
+  # Function #
 
   # set the random seed
   set.seed(seed)
-
-  # convert k, num.init, and max.itertations to integers
+  
+  # convert k, num.init, and max.iterations to integers
   k = floor(k)
   num.init = floor(num.init)
   max.iterations = floor(max.iterations)
@@ -94,23 +92,24 @@ Wkmeans <- function (dataset, k, cl.centers = NULL, obs.weights = rep(1, nrow(da
                   U, ":", sep = ""))}
 
     #k-means with observation weights
-    result = Wkmeans_single(x = dataset, u = cl.centers, w = obs.weights,k=k,K=max.iterations)
+    result = Wkmeans_single(x = dataset, u = cl.centers, w = obs.weights,
+                            k = k, K = max.iterations)
 
     #get cluster assignments and wwcss
     clusterAss = result[[2]]
-    wss = result[[1]]
+    wwcss_cl = result[[1]]
 
     #print total wwcss for each initialization
-    print(wss)
+    print(wwcss_cl)
 
     # check if current results are better, if so, replace them
-    if (is.null(best.clusters) == TRUE) {
+    if (is.null(best.clusters)) {
       best.clusters = clusterAss
-      best.WWCSS.results = wss
+      best.WWCSS.results = wwcss_cl
     }
-    else if (best.WWCSS.results > wss) {
+    else if (best.WWCSS.results > wwcss_cl) {
       best.clusters = clusterAss
-      best.WWCSS.results = wss
+      best.WWCSS.results = wwcss_cl
     }
   }
 
@@ -123,95 +122,126 @@ Wkmeans <- function (dataset, k, cl.centers = NULL, obs.weights = rep(1, nrow(da
   #create output
   output = list(best.clusters, best.cl.centers, best.WWCSS.results)
   # give names to the output
-  names(output) = c("Cluster Assignments", "Cluster Centers","Weighted WCSS")
+  names(output) = c("Cluster Assignments", "Cluster Centers","WWCSS")
 
   return(output)
 }
 
 
-#Function to initialize clusters
-#x is the data matrix,  w is the weight vector, k is the number of desired clusters,
-#u is chosen cluster centers by users. If not NULL, must be a k by ncol(dataset) matrix
-#containing only entries of class numeric.
-init= function(x,w=rep(1,nrow(x)),k=3, u = NULL){
-  clcenter = u
-  zz = NULL
-  n = nrow(x)
-  ff = function(k,n)  sample(c(1:k,sample(k,n-k,replace =TRUE)))
-  while(length(unique(zz)) <k){
-    if(is.null(u)){
-      y = ff(k,n)
-      while(min(table(y))<2)  y = ff(k,n)
-      clcenter = wmean(x,y,w)}
-    z = NULL
-    for(i in 1:k)
-      z =cbind(z,apply(w*(t(t(x)-clcenter[,i]))^2,1,sum))
-    zz=apply(z,1,which.min)
+
+# Function to compute the weighted distance matrix of the observations from the cluster centers
+# x is the data matrix, centers are the cluster centers, w is the weight vector
+
+wdist_mat <- function(x, centers, w){
+  
+  x <- as.matrix(x)
+  k <- ncol(centers)
+  w_mat <- diag(w)
+  
+  m11 <- array(x^2 %*% rep(1,ncol(x)), dim = c(nrow(x),k))
+  m22 <- matrix(rep(1,ncol(x))%*% centers^2, nrow = nrow(x), k, byrow = TRUE)
+  m12 <- x%*%centers
+  
+  dist_mat <- m11 + m22 - 2 * m12
+  return (w_mat %*% dist_mat)
+}
+
+
+
+
+# Function to initialize cluster assignments
+# x is the data matrix,  w is the weight vector, k is the number of desired clusters,
+# u is chosen cluster centers by users. If not NULL, must be a ncol(dataset) by k matrix
+# containing only entries of class numeric.
+
+init = function(x, w = rep(1,nrow(x)), k, u = NULL){
+  
+  clcenter <- u 
+  z = NULL ; zz = NULL
+  n <- nrow(x) 
+  
+  # The functions controls for at least one observation per cluster
+  ff <- function(k,n)  sample(c(1:k, sample(k, n-k, replace =TRUE)))
+  
+  while(length(unique(zz)) < k){
+    
+    if(is.null(u)){y <- ff(k,n) 
+      while(min(table(y))<2)  y <- ff(k,n) # if only one observation in any cluster, do reassignment
+      
+      clcenter <- wmean(x, cl = y, w) # if no user defined cluster centers
+    }
+    
+    z = wdist_mat(x, centers = clcenter, w = w)
+    zz = apply(z,1,which.min)
+    zz = setNames(zz, row.names(x))
+    
     if(length(unique(zz)) <k & !is.null(u)){
-      stop("For the initialization, no data assigned to one(multiple) of clusters based on the weighted
+      stop("For the initialization, no data assigned to one(or multiple) of the clusters based on the weighted
          distance to the initial cluster centers chosen by users.")
     }
   }
-  zz
+  return (zz)
 }
 
 
-#Wkmeans for one initialization
-#x is the data matrix, y is cluster assignment vector, w is the weight vector,
-#k is the number of desired clusters,
-#u is chosen cluster centers by users. If not NULL, must be a k by ncol(dataset) matrix
-#containing only entries of class numeric,
-#K is number of iterations.
-Wkmeans_single = function(x,y,u = NULL, w = rep(1, length(y)),k=3,K=30) {
-  if(missing(y)) y = init(x,w,k,u)
+
+
+# Wkmeans for one initialization
+# x is the data matrix, y is cluster assignment vector, w is the weight vector,
+# k is the number of desired clusters,
+# u is chosen cluster centers by users. If not NULL, must be a ncol(dataset) by k matrix
+# containing only entries of class numeric,
+# K is number of iterations.
+
+Wkmeans_single = function(x, y, u = NULL, w = rep(1, length(y)), k, K = 30) {
+  
+  if(missing(y)) y = init(x, w, k, u)
   n = length(y)
   #if(missing(K)) K=2^(40/log10(n))
-  k = max(y)
-  tb= table(y)
-  yy=y2=y
-
+  
+  k <- max(y) # number of clusters
+  tb <- table(y) # cluster sizes
+  
+  yy = y2 = y
+  
   for(l in 1:K) {
     message(paste("Iteration ",
                   l, sep = ""))
-    uu0 = uu00 = wwcss(x,yy,w)
+    
+    uu0 <- uu00 <- wwcss(x, cl = yy, w) # weighted within cluster SS
+    
     for(ll in 1:20) {
       #message(paste("iteration ", ll, sep = ""))
-      yy0=yy
-      mm=wcmat(t(x),yy,w)
-      m12=array(x^2 %*% rep(1,ncol(x)),dim=c(nrow(x),k))
-      m21=matrix(rep(1,nrow(mm))%*% mm^2,nrow=nrow(x),k,byrow=T)
-      m22=x%*%mm
-      yy=apply(m12+m21-m22*2,1,which.min)
-      uu0 = wwcss(x,yy,w)
+      yy0 <- yy
+      
+      z = NULL
+      
+      kcl_centers <- wmean(x, cl = yy0, w = w) # cluster centers
+      z = wdist_mat(x, centers = kcl_centers, w = w)
+      yy = apply(z,1,which.min) # new cluster assignments
+    
+      uu0 = wwcss(x,cl = yy,w) # new wwcss
+      
       #      if( all(yy==yy0)) break
-      if(uu0>uu00) yy=yy0 else if(uu0<=uu00) uu0=uu00
+      if(uu0 > uu00) yy = yy0 
+      else if(uu0<=uu00) uu00 = uu0
     }
 
-    uu0 = uu00 = wwcss(x,yy,w)
+    uu0 = uu00 = wwcss(x,cl = yy, w)
     # message(paste( uu0, sep=" "))
-    for(i in 1:n) { for (j in 1:k){
-      y2 = yy;
-      if(y2[i]!=j & tb[y2[i]]>1) {
-        y2[i]=j
-        uu1= wwcss(x, y2,w)
-        if(uu1<= uu0) {uu0= uu1; yy = y2; tb= table(yy)  }
+    # local search optimization
+    for(i in 1:n){ 
+      for (j in 1:k){y2 = yy;
+        if(y2[i]!=j & tb[y2[i]]>1) {
+          y2[i]=j
+          uu1= wwcss(x, y2,w)
+          if(uu1<= uu0) {uu0= uu1; yy = y2; tb= table(yy)  }
+        }
       }
-    }
     }
     if(all(yy0==yy)) break;
   }
+  yy = setNames(yy, row.names(x))
   list(uu0,yy)
 }
 
-
-wcmat = function (x, gr,w=rep(1,nrow(x)))
-{
-  x <- x[, sort.list(gr)]
-  w = w[sort.list(gr)]
-  tk <- c(table(gr))
-  p <- length(tk)
-  ttk <- cbind(rep(tk, p), 0)
-  ttk[1 + (p + 1) * (0:(p - 1)), 2] <- 1
-  z <- array(rep(ttk[, 2], ttk[, 1]), c(length(gr), p))
-  t(t(x %*% z)/tk)
-}

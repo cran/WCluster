@@ -1,8 +1,9 @@
 
-# function producing the hierarchical tree for observations with weights
+# Function producing the hierarchical tree for observations with weights
 # by weighted agglomerative hierarchical clustering
 # x is the data matrix,  w is the weight vector
-Whclust <- function(x,w = rep(1,nrow(x))){
+
+Whclust <- function(x, w = rep(1,nrow(x))){
 
   # convert the data set to a data matrix
   x = as.matrix(x)
@@ -15,7 +16,7 @@ Whclust <- function(x,w = rep(1,nrow(x))){
 
   match.call()
 
-  #Observations are treated separately as singleton clusters at the first
+  #Observations are treated separately as singleton clusters at first
   y = -(1:( n<-nrow(x)))
   kk=NULL
   y0= sort(unique(y))

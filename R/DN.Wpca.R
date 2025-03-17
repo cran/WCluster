@@ -3,7 +3,7 @@
 # Weighted PCA for Data Nugget object
 # datanugget is a "datanugget" object
 # wcol is column weights.
-#corr indicates whether to use correlation matrix or not.
+# corr indicates whether to use correlation matrix or not.
 
 
 DN.Wpca=function (datanugget, wcol = NULL, corr = FALSE)
